@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -53,9 +53,18 @@ export default function Home() {
   const [copyMessage, setCopyMessage] = useState("");
   const [mode, setMode] = useState("web");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfPage, setPdfPage] = useState(1);
+  const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
   const [documentId, setDocumentId] = useState("");
   const [uploadLoading, setUploadLoading] = useState(false);
   const [documentSources, setDocumentSources] = useState([]);
+
+  useEffect(() => {
+    if (!pdfUrl) return;
+
+    return () => URL.revokeObjectURL(pdfUrl);
+  }, [pdfUrl]);
 
   function handleModeChange(nextMode) {
     if (loading || uploadLoading) return;
@@ -346,7 +355,11 @@ export default function Home() {
                     type="file"
                     accept=".pdf,application/pdf"
                     onChange={(event) => {
-                      setSelectedFile(event.target.files?.[0] || null);
+                      const file = event.target.files?.[0] || null;
+                      setSelectedFile(file);
+                      setPdfUrl(file ? URL.createObjectURL(file) : null);
+                      setPdfPage(1);
+                      setPdfViewerOpen(false);
                       setError("");
                     }}
                     className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white p-2 text-sm"
@@ -490,6 +503,7 @@ export default function Home() {
         {(answer ||
           claimChecks.length > 0 ||
           validSources.length > 0 ||
+          pdfUrl ||
           (mode === "documents" && documentSources.length > 0)) && (
           <div className="mx-auto mt-8 grid w-full max-w-7xl gap-5 lg:grid-cols-[minmax(0,1.65fr)_minmax(19rem,0.85fr)] lg:items-start">
             {/* Research report */}
@@ -587,11 +601,22 @@ export default function Home() {
                         {source.filename}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500">
-                        Chunk {source.chunkIndex}
-                        {typeof source.similarity === "number"
-                          ? ` · Similarity: ${(source.similarity * 100).toFixed(1)}%`
-                          : ""}
+                      <p className="text-xs text-gray-500">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPdfPage(
+                              Math.max(1, Number(source.pageNumber) || 1),
+                            );
+                            setPdfViewerOpen(true);
+                          }}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Page {source.pageNumber || 1}
+                        </button>
+                        {" · "}
+                        Chunk {source.chunkIndex} · Similarity:{" "}
+                        {(source.similarity * 100).toFixed(1)}%
                       </p>
 
                       {source.text && (
@@ -602,6 +627,30 @@ export default function Home() {
                     </article>
                   ))}
                 </div>
+              </section>
+            )}
+
+            {pdfUrl && pdfViewerOpen && (
+              <section className="mt-6 rounded-xl border p-4 lg:col-span-2">
+                <div className="mb-3 flex items-center justify-between gap-4">
+                  <h2 className="text-lg font-semibold">
+                    PDF Viewer — Page {pdfPage}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setPdfViewerOpen(false)}
+                    className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                  >
+                    Close PDF
+                  </button>
+                </div>
+
+                <iframe
+                  key={`${pdfUrl}-${pdfPage}`}
+                  src={`${pdfUrl}#page=${pdfPage}`}
+                  title="PDF Viewer"
+                  className="h-[700px] w-full rounded-lg bg-white"
+                />
               </section>
             )}
 
