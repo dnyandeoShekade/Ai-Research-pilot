@@ -1,14 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-
-const suggestions = [
-  "Compare LangGraph vs CrewAI",
-  "How does RAG work?",
-  "Latest AI agent architectures",
-];
+import ResearchForm from "../components/ResearchForm";
+import ResearchResults from "../components/ResearchResults";
 
 const statusConfig = {
   supported: {
@@ -291,176 +285,24 @@ export default function Home() {
 
       <div className="relative mx-auto max-w-7xl px-5 pb-12 pt-7 sm:px-8 sm:pt-9">
         {/* Hero and question form */}
-        <section className="mx-auto max-w-4xl text-center">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white/80 px-3.5 py-1.5 text-[11px] font-semibold text-violet-700 shadow-sm shadow-violet-100/70">
-            <span>✳</span>A clearer way to explore complex ideas
-          </div>
-
-          <h2 className="text-3xl font-semibold leading-[1.1] tracking-[-0.045em] text-slate-950 sm:text-5xl">
-            Find the signal.
-            <span className="mt-1 block bg-gradient-to-r from-violet-700 via-indigo-600 to-blue-500 bg-clip-text text-transparent">
-              Understand the story.
-            </span>
-          </h2>
-
-          <p className="mx-auto mt-3 max-w-2xl text-xs leading-6 text-slate-600 sm:text-sm">
-            Ask a question and get a thoughtful, source-backed research brief
-            with key claims checked along the way.
-          </p>
-
-          <form
-            onSubmit={mode === "web" ? handleResearch : handleAskDocument}
-            className="mt-6 rounded-3xl border border-slate-200/90 bg-white p-3 text-left shadow-[0_20px_60px_-32px_rgba(49,46,129,0.3)] transition duration-200 focus-within:border-violet-300 focus-within:shadow-[0_20px_60px_-32px_rgba(99,102,241,0.4)] sm:p-4"
-          >
-            <div className="mb-5 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => handleModeChange("web")}
-                disabled={loading || uploadLoading}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                  mode === "web"
-                    ? "bg-violet-600 text-white"
-                    : "border border-slate-200 bg-white text-slate-600"
-                } disabled:cursor-not-allowed disabled:opacity-50`}
-              >
-                Web Research
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleModeChange("documents")}
-                disabled={loading || uploadLoading}
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                  mode === "documents"
-                    ? "bg-violet-600 text-white"
-                    : "border border-slate-200 bg-white text-slate-600"
-                } disabled:cursor-not-allowed disabled:opacity-50`}
-              >
-                Ask My Documents
-              </button>
-            </div>
-
-            {mode === "documents" && (
-              <div className="mb-5 rounded-2xl border border-violet-100 bg-violet-50/50 p-4">
-                <label
-                  htmlFor="pdf-upload"
-                  className="mb-2 block text-sm font-semibold"
-                >
-                  Upload a PDF document
-                </label>
-
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <input
-                    id="pdf-upload"
-                    type="file"
-                    accept=".pdf,application/pdf"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0] || null;
-                      setSelectedFile(file);
-                      setPdfUrl(file ? URL.createObjectURL(file) : null);
-                      setPdfPage(1);
-                      setPdfViewerOpen(false);
-                      setError("");
-                    }}
-                    className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white p-2 text-sm"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={handleUpload}
-                    disabled={!selectedFile || uploadLoading || loading}
-                    className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    {uploadLoading ? "Uploading..." : "Upload PDF"}
-                  </button>
-                </div>
-
-                {documentId && (
-                  <p className="mt-3 break-all text-xs text-emerald-700">
-                    PDF ready. Document ID: {documentId}
-                  </p>
-                )}
-
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  Upload a PDF, wait for processing to finish, then ask
-                  questions about its contents.
-                </p>
-              </div>
-            )}
-
-            <label
-              htmlFor="question"
-              className="mb-2 block px-1 text-xs font-semibold text-slate-800"
-            >
-              {mode === "web"
-                ? "What are you researching today?"
-                : "What would you like to know about your documents?"}
-            </label>
-
-            <textarea
-              id="question"
-              value={question}
-              onChange={(event) => setQuestion(event.target.value)}
-              onKeyDown={(event) => {
-                if (
-                  event.key === "Enter" &&
-                  !event.shiftKey &&
-                  !event.nativeEvent.isComposing
-                ) {
-                  event.preventDefault();
-                  event.currentTarget.form?.requestSubmit();
-                }
-              }}
-              placeholder="Ask a question, compare approaches, or explore an idea..."
-              maxLength={2000}
-              required
-              rows={3}
-              className="w-full resize-y rounded-2xl border border-transparent bg-slate-50/90 p-3.5 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-100 focus:bg-white"
-            />
-
-            <div className="mt-2 flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[11px] leading-5 text-slate-400">
-                {question.length}/2000 characters · Shift + Enter for a new line
-              </p>
-
-              <button
-                type="submit"
-                disabled={loading || !question.trim()}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-200/80 transition hover:-translate-y-0.5 hover:from-violet-700 hover:to-indigo-700 hover:shadow-lg disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                    Researching...
-                  </>
-                ) : (
-                  <>
-                    {mode === "web" ? "Start Research" : "Ask Documents"}{" "}
-                    <span aria-hidden="true">↗</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* Suggested questions */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-            <span className="mr-1 text-xs font-medium text-slate-400">
-              Try asking
-            </span>
-
-            {suggestions.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setQuestion(item)}
-                className="rounded-full border border-slate-200/90 bg-white/80 px-3 py-1.5 text-[11px] text-slate-600 shadow-sm shadow-slate-200/50 transition hover:-translate-y-0.5 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </section>
+        <ResearchForm
+          question={question}
+          setQuestion={setQuestion}
+          mode={mode}
+          handleResearch={handleResearch}
+          handleAskDocument={handleAskDocument}
+          handleModeChange={handleModeChange}
+          loading={loading}
+          uploadLoading={uploadLoading}
+          selectedFile={selectedFile}
+          setSelectedFile={setSelectedFile}
+          setPdfUrl={setPdfUrl}
+          setPdfPage={setPdfPage}
+          setPdfViewerOpen={setPdfViewerOpen}
+          setError={setError}
+          documentId={documentId}
+          handleUpload={handleUpload}
+        />
 
         {/* Error message */}
         {error && (
@@ -500,356 +342,26 @@ export default function Home() {
           </section>
         )}
 
-        {(answer ||
-          claimChecks.length > 0 ||
-          validSources.length > 0 ||
-          pdfUrl ||
-          (mode === "documents" && documentSources.length > 0)) && (
-          <div className="mx-auto mt-8 grid w-full max-w-7xl gap-5 lg:grid-cols-[minmax(0,1.65fr)_minmax(19rem,0.85fr)] lg:items-start">
-            {/* Research report */}
-            {answer && (
-              <section className="min-w-0 overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_18px_55px_-38px_rgba(30,41,59,0.45)]">
-                <div className="flex flex-col gap-4 border-b border-slate-100 bg-gradient-to-br from-white via-white to-violet-50/70 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-                  <div>
-                    <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-indigo-600">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
-                        ✳
-                      </span>
-                      Your research brief
-                    </div>
-
-                    <h3 className="text-2xl font-semibold tracking-tight text-slate-950">
-                      Research Results
-                    </h3>
-
-                    {provider && (
-                      <p className="mt-2 text-sm text-slate-500">
-                        Generated by {provider}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCopy}
-                      className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
-                    >
-                      Copy answer
-                    </button>
-
-                    {copyMessage && (
-                      <span role="status" className="text-xs text-emerald-700">
-                        {copyMessage}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="px-5 py-6 sm:px-8 sm:py-7">
-                  <div className="prose prose-slate max-w-none break-words text-[15px] leading-8 prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-3xl prose-h2:mt-8 prose-h2:text-2xl prose-h3:text-xl prose-a:text-violet-700 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-violet-300 prose-blockquote:text-slate-600 prose-code:rounded prose-code:bg-slate-100 prose-code:px-1 prose-code:py-0.5 prose-code:font-medium prose-code:text-violet-700 prose-pre:overflow-x-auto prose-pre:rounded-2xl prose-pre:bg-slate-950 prose-pre:text-slate-100 prose-table:block prose-table:overflow-x-auto prose-th:bg-slate-50 prose-th:px-4 prose-th:py-3 prose-td:px-4 prose-td:py-3 prose-hr:border-slate-200">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({ href, children, ...props }) => {
-                          const safeHref = isValidHttpUrl(href || "")
-                            ? href
-                            : undefined;
-
-                          return (
-                            <a
-                              {...props}
-                              href={safeHref}
-                              target={safeHref ? "_blank" : undefined}
-                              rel={safeHref ? "noopener noreferrer" : undefined}
-                            >
-                              {children}
-                            </a>
-                          );
-                        },
-                      }}
-                    >
-                      {answer}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-
-                <div className="border-t border-slate-100 bg-slate-50/70 px-6 py-4 text-xs text-slate-500 sm:px-8">
-                  Review important claims and verify sources before relying on
-                  them.
-                </div>
-              </section>
-            )}
-
-            {mode === "documents" && documentSources.length > 0 && (
-              <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Document Sources
-                </h3>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Retrieved passages used to answer your question.
-                </p>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {documentSources.map((source, index) => (
-                    <article
-                      key={`${source.filename}-${source.chunkIndex}-${index}`}
-                      className="rounded-xl border border-slate-200 bg-slate-50 p-4"
-                    >
-                      <p className="break-words text-sm font-semibold text-violet-700">
-                        {source.filename}
-                      </p>
-
-                      <p className="text-xs text-gray-500">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPdfPage(
-                              Math.max(1, Number(source.pageNumber) || 1),
-                            );
-                            setPdfViewerOpen(true);
-                          }}
-                          className="text-blue-600 hover:underline"
-                        >
-                          Page {source.pageNumber || 1}
-                        </button>
-                        {" · "}
-                        Chunk {source.chunkIndex} · Similarity:{" "}
-                        {(source.similarity * 100).toFixed(1)}%
-                      </p>
-
-                      {source.text && (
-                        <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">
-                          {source.text}
-                        </p>
-                      )}
-                    </article>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {pdfUrl && pdfViewerOpen && (
-              <section className="mt-6 rounded-xl border p-4 lg:col-span-2">
-                <div className="mb-3 flex items-center justify-between gap-4">
-                  <h2 className="text-lg font-semibold">
-                    PDF Viewer — Page {pdfPage}
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => setPdfViewerOpen(false)}
-                    className="text-sm font-medium text-slate-600 hover:text-slate-900"
-                  >
-                    Close PDF
-                  </button>
-                </div>
-
-                <iframe
-                  key={`${pdfUrl}-${pdfPage}`}
-                  src={`${pdfUrl}#page=${pdfPage}`}
-                  title="PDF Viewer"
-                  className="h-[700px] w-full rounded-lg bg-white"
-                />
-              </section>
-            )}
-
-            <aside className="space-y-5">
-              {/* Claim verification */}
-              {claimChecks.length > 0 && (
-                <section
-                  aria-labelledby="verification-heading"
-                  className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-[0_18px_55px_-38px_rgba(30,41,59,0.45)] sm:p-6"
-                >
-                  <div className="mb-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-violet-700">
-                      Evidence review
-                    </p>
-
-                    <h3
-                      id="verification-heading"
-                      className="mt-2 text-xl font-semibold tracking-tight text-slate-950"
-                    >
-                      Claim Verification
-                    </h3>
-
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      AI-assisted checks against retrieved source content. These
-                      results may be incomplete and are not definitive proof.
-                    </p>
-                  </div>
-
-                  {/* Summary counts */}
-                  <div className="mb-6 grid grid-cols-3 gap-2">
-                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-3">
-                      <p className="text-[11px] leading-4 text-emerald-700">
-                        Supported
-                      </p>
-                      <p className="mt-1 text-2xl font-semibold text-emerald-800">
-                        {verificationSummary.supported}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-red-100 bg-red-50/70 p-3">
-                      <p className="text-[11px] leading-4 text-red-700">
-                        Contradicted
-                      </p>
-                      <p className="mt-1 text-2xl font-semibold text-red-800">
-                        {verificationSummary.contradicted}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-amber-100 bg-amber-50/70 p-3">
-                      <p className="text-[11px] leading-4 text-amber-800">
-                        Uncertain / insufficient
-                      </p>
-                      <p className="mt-1 text-2xl font-semibold text-amber-900">
-                        {verificationSummary.uncertain}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {claimChecks.map((item, index) => {
-                      const status = normalizeStatus(item.status);
-
-                      const badge = statusConfig[status] || {
-                        label: "Unverified",
-                        marker: "?",
-                        classes: "bg-slate-100 text-slate-700 ring-slate-200",
-                      };
-
-                      const evidenceUrls = Array.isArray(item.sourceUrls)
-                        ? [...new Set(item.sourceUrls.filter(isValidHttpUrl))]
-                        : [];
-
-                      return (
-                        <article
-                          key={`${item.claim || "claim"}-${index}`}
-                          className="rounded-2xl border border-slate-200/90 bg-white p-4 transition hover:border-violet-200 hover:shadow-sm"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                              Claim {index + 1}
-                            </span>
-
-                            <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ${badge.classes}`}
-                            >
-                              <span aria-hidden="true">{badge.marker}</span>
-                              {badge.label}
-                            </span>
-                          </div>
-
-                          <p className="mt-4 break-words text-sm font-medium leading-7 text-slate-800">
-                            {item.claim || "No claim text provided."}
-                          </p>
-
-                          {item.explanation && (
-                            <div className="mt-4 rounded-xl bg-slate-50 p-4">
-                              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                Explanation
-                              </p>
-
-                              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">
-                                {item.explanation}
-                              </p>
-                            </div>
-                          )}
-
-                          {evidenceUrls.length > 0 && (
-                            <div className="mt-4">
-                              <p className="mb-2 text-xs font-semibold text-slate-500">
-                                Evidence sources
-                              </p>
-
-                              <ul className="space-y-2">
-                                {evidenceUrls.map((url, sourceIndex) => {
-                                  const matchingSource = sources.find(
-                                    (source) => source.url === url,
-                                  );
-
-                                  return (
-                                    <li key={`${url}-${sourceIndex}`}>
-                                      <a
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="break-all text-sm text-violet-700 hover:underline"
-                                      >
-                                        {matchingSource?.title ||
-                                          `Evidence source ${sourceIndex + 1}`}{" "}
-                                        ↗
-                                      </a>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
-                          )}
-                        </article>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
-
-              {/* Sources */}
-              {validSources.length > 0 && (
-                <section
-                  aria-labelledby="sources-heading"
-                  className="rounded-3xl border border-slate-200/90 bg-white px-5 py-5 shadow-[0_18px_55px_-38px_rgba(30,41,59,0.45)] sm:px-6"
-                >
-                  <h3
-                    id="sources-heading"
-                    className="text-lg font-semibold text-slate-950"
-                  >
-                    <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-sm text-indigo-700">
-                      ↗
-                    </span>
-                    Research Sources
-                    <span className="ml-2 text-sm font-normal text-slate-500">
-                      ({validSources.length})
-                    </span>
-                  </h3>
-
-                  <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Sources retrieved for this research. A source being listed
-                    does not automatically mean it supports every claim.
-                  </p>
-
-                  <ul className="mt-4 space-y-3">
-                    {validSources.map((source, index) => (
-                      <li
-                        key={`${source.url}-${index}`}
-                        className="rounded-xl border border-slate-200/90 bg-white p-4 transition hover:border-violet-200 hover:bg-violet-50/30"
-                      >
-                        <a
-                          href={source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="break-words font-medium text-violet-700 hover:underline"
-                        >
-                          {index + 1}. {source.title || source.url}
-                        </a>
-
-                        {source.content && (
-                          <p className="mt-2 break-words text-sm leading-6 text-slate-500">
-                            {source.content
-                              .replace(/\\#/g, "#")
-                              .replace(/\\([*_[\]()])/g, "$1")
-                              .slice(0, 220)}
-                            {source.content.length > 220 ? "..." : ""}
-                          </p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-            </aside>
-          </div>
-        )}
+        <ResearchResults
+          answer={answer}
+          provider={provider}
+          claimChecks={claimChecks}
+          validSources={validSources}
+          pdfUrl={pdfUrl}
+          mode={mode}
+          documentSources={documentSources}
+          pdfViewerOpen={pdfViewerOpen}
+          pdfPage={pdfPage}
+          setPdfPage={setPdfPage}
+          setPdfViewerOpen={setPdfViewerOpen}
+          handleCopy={handleCopy}
+          copyMessage={copyMessage}
+          verificationSummary={verificationSummary}
+          sources={sources}
+          normalizeStatus={normalizeStatus}
+          statusConfig={statusConfig}
+          isValidHttpUrl={isValidHttpUrl}
+        />
 
         {/* Footer */}
         <footer className="mt-12 border-t border-slate-200/80 pt-5 text-center text-[11px] text-slate-400">
