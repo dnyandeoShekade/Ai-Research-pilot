@@ -1,0 +1,26 @@
+export default function manifest() {
+  return {
+    name: "ResearchPilot AI",
+    short_name: "ResearchPilot",
+    description: "AI-powered research and research automation platform.",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#09090B",
+    theme_color: "#09090B",
+    orientation: "portrait",
+    icons: [
+      {
+        src: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any maskable",
+      },
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any maskable",
+      },
+    ],
+  };
+}

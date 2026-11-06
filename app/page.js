@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import ResearchForm from "../components/ResearchForm";
 import ResearchResults from "../components/ResearchResults";
+import PwaInstallButton from "../components/PwaInstallButton";
 
 const statusConfig = {
   supported: {
@@ -273,12 +274,15 @@ export default function Home() {
             </div>
           </a>
 
-          <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm sm:flex">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-50" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-500" />
-            </span>
-            Research assistant
+          <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm sm:flex">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-500" />
+              </span>
+              Research assistant
+            </div>
+            <PwaInstallButton />
           </div>
         </div>
       </header>

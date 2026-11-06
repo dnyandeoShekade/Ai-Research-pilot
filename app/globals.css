@@ -24,3 +24,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-poppins), sans-serif;
 }
+
+@media (max-width: 640px) {
+  button {
+    min-height: 44px;
+  }
+}

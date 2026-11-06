@@ -20,6 +20,19 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Install as a PWA
+
+The service worker is enabled for production builds. To test it locally, run:
+
+```bash
+npm run build
+npm run start
+```
+
+Open `http://localhost:3000` (localhost is treated as a secure context). For installation on a device, deploy the site over HTTPS. On Android, open the deployed site in Chrome and use the **Install App** button when it appears, or choose **Install app** / **Add to Home screen** from Chrome's menu. On iPhone or iPad, use **Install App** for instructions, then choose **Share > Add to Home Screen** in Safari.
+
+The service worker caches the app shell and static assets only; research, document upload, and other API requests are not cached.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
